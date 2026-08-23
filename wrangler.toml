@@ -1,8 +1,8 @@
 # Deploys the main MiliConfig Pro dashboard (this React app + the bundled
 # misub-app/ sub-app under dist/misub-app/) as a Cloudflare Worker using
 # Workers Static Assets — no server-side Worker logic needed, since all
-# Cloudflare API calls happen server-side in the Supabase cf-deploy edge
-# function, not from the browser.
+# Cloudflare API calls happen server-side in the cf-deploy edge function,
+# not from the browser.
 name = "miliconfig-pro"
 compatibility_date = "2025-01-01"
 
@@ -20,3 +20,28 @@ not_found_handling = "single-page-application"
 # build environment variables in the Cloudflare dashboard instead (see
 # DEPLOYMENT.md), never committed here.
 command = "npm run build"
+
+# ============================================
+# Cloudflare D1 Database - جایگزین Supabase
+# ============================================
+# دستور ساخت: wrangler d1 create mili-config-pro-db
+# دستور اعمال اسکیما: wrangler d1 execute mili-config-pro-db --file=cloudflare-db/schema.sql
+[[d1_databases]]
+binding = "DB"
+database_name = "mili-config-pro-db"
+database_id = "YOUR_DATABASE_ID_HERE"  # بعد از ساخت دیتابیس، ID را اینجا قرار دهید
+
+# ============================================
+# Cloudflare KV Namespaces
+# ============================================
+# دستور ساخت: wrangler kv namespace create MILI-KV
+[[kv_namespaces]]
+binding = "KV"
+id = "YOUR_KV_NAMESPACE_ID_HERE"  # بعد از ساخت KV، ID را اینجا قرار دهید
+preview_id = "YOUR_PREVIEW_KV_NAMESPACE_ID_HERE"
+
+# KV برای ورکر custom (Mili)
+[[kv_namespaces]]
+binding = "C"
+id = "YOUR_CUSTOM_KV_ID_HERE"  # می‌تواند همان KV بالا باشد یا جداگانه
+preview_id = "YOUR_PREVIEW_CUSTOM_KV_ID_HERE"
