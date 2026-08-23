@@ -70,39 +70,39 @@ const MiSubContext = createContext<MiSubState | null>(null)
 
 export function MiSubProvider({ children }: { children: ReactNode }) {
   const [activeTab, setActiveTabState] = useState<MiSubTab>(() => {
-    const saved = db.get('activeTab', 'optimizer')
-    return (VALID_TABS as readonly string[]).includes(saved) ? saved : 'optimizer'
+    const saved = db.get('activeTab') as string | null
+    return (saved && (VALID_TABS as readonly string[]).includes(saved)) ? saved as MiSubTab : 'optimizer'
   })
   const setActiveTab = (t: MiSubTab) => { setActiveTabState(t); db.set('activeTab', t) }
 
-  const [cleanIp, setCleanIpState] = useState<string>(() => db.get('cleanIp', '104.16.1.1'))
+  const [cleanIp, setCleanIpState] = useState<string>(() => db.get('cleanIp') as string || '104.16.1.1')
   const setCleanIp = (v: string) => { setCleanIpState(v); db.set('cleanIp', v) }
 
-  const [cleanPort, setCleanPortState] = useState<string>(() => db.get('cleanPort', '443'))
+  const [cleanPort, setCleanPortState] = useState<string>(() => db.get('cleanPort') as string || '443')
   const setCleanPort = (v: string) => { setCleanPortState(v); db.set('cleanPort', v) }
 
-  const [customSni, setCustomSniState] = useState<string>(() => db.get('customSni', 'speed.cloudflare.com'))
+  const [customSni, setCustomSniState] = useState<string>(() => db.get('customSni') as string || 'speed.cloudflare.com')
   const setCustomSni = (v: string) => { setCustomSniState(v); db.set('customSni', v) }
 
-  const [prefix, setPrefixState] = useState<string>(() => db.get('prefix', '[CF-Clean]'))
+  const [prefix, setPrefixState] = useState<string>(() => db.get('prefix') as string || '[CF-Clean]')
   const setPrefix = (v: string) => { setPrefixState(v); db.set('prefix', v) }
 
-  const [inputNodes, setInputNodesState] = useState<string>(() => db.get('inputNodes', ''))
+  const [inputNodes, setInputNodesState] = useState<string>(() => db.get('inputNodes') as string || '')
   const setInputNodes = (v: string) => { setInputNodesState(v); db.set('inputNodes', v) }
 
-  const [fragmentEnabled, setFragmentEnabledState] = useState<boolean>(() => db.get('fragmentEnabled', false))
+  const [fragmentEnabled, setFragmentEnabledState] = useState<boolean>(() => db.get('fragmentEnabled') as boolean ?? false)
   const setFragmentEnabled = (v: boolean) => { setFragmentEnabledState(v); db.set('fragmentEnabled', v) }
 
-  const [fragmentConfig, setFragmentConfigState] = useState<FragmentConfig>(() => db.get('fragmentConfig', { length: '10-50', interval: '10-20', packets: 'tlshello' }))
+  const [fragmentConfig, setFragmentConfigState] = useState<FragmentConfig>(() => db.get('fragmentConfig') as FragmentConfig || { length: '10-50', interval: '10-20', packets: 'tlshello' })
   const setFragmentConfig = (v: FragmentConfig) => { setFragmentConfigState(v); db.set('fragmentConfig', v) }
 
-  const [fpValue, setFpValueState] = useState<string>(() => db.get('fpValue', 'unsafe'))
+  const [fpValue, setFpValueState] = useState<string>(() => db.get('fpValue') as string || 'unsafe')
   const setFpValue = (v: string) => { setFpValueState(v); db.set('fpValue', v) }
 
-  const [csValue, setCsValueState] = useState<string>(() => db.get('csValue', ''))
+  const [csValue, setCsValueState] = useState<string>(() => db.get('csValue') as string || '')
   const setCsValue = (v: string) => { setCsValueState(v); db.set('csValue', v) }
 
-  const [fmValue, setFmValueState] = useState<string>(() => db.get('fmValue', ''))
+  const [fmValue, setFmValueState] = useState<string>(() => db.get('fmValue') as string || '')
   const setFmValue = (v: string) => { setFmValueState(v); db.set('fmValue', v) }
 
   const [arasMode, setArasMode] = useState<boolean>(false)
@@ -111,10 +111,10 @@ export function MiSubProvider({ children }: { children: ReactNode }) {
   const [optimizedPingResults, setOptimizedPingResults] = useState<Record<string, unknown>>({})
   const [isTestingOptimizedPings, setIsTestingOptimizedPings] = useState(false)
 
-  const [scannerIpsInput, setScannerIpsInputState] = useState<string>(() => db.get('scannerIpsInput', '104.16.1.1\n104.16.12.1\n172.64.80.1\n104.16.2.1\n172.67.1.1\n162.158.5.1\n198.41.129.1'))
+  const [scannerIpsInput, setScannerIpsInputState] = useState<string>(() => db.get('scannerIpsInput') as string || '104.16.1.1\n104.16.12.1\n172.64.80.1\n104.16.2.1\n172.67.1.1\n162.158.5.1\n198.41.129.1')
   const setScannerIpsInput = (v: string) => { setScannerIpsInputState(v); db.set('scannerIpsInput', v) }
 
-  const [scannerResults, setScannerResultsState] = useState<ScanResult[]>(() => db.get('scannerResults', []))
+  const [scannerResults, setScannerResultsState] = useState<ScanResult[]>(() => db.get('scannerResults') as ScanResult[] || [])
   const setScannerResults = (v: ScanResult[] | ((prev: ScanResult[]) => ScanResult[])) => {
     setScannerResultsState((prev) => {
       const next = typeof v === 'function' ? (v as (p: ScanResult[]) => ScanResult[])(prev) : v
@@ -123,20 +123,20 @@ export function MiSubProvider({ children }: { children: ReactNode }) {
     })
   }
 
-  const [concurrency, setConcurrencyState] = useState<number>(() => db.get('concurrency', 8))
+  const [concurrency, setConcurrencyState] = useState<number>(() => db.get('concurrency') as number || 8)
   const setConcurrency = (v: number) => { setConcurrencyState(v); db.set('concurrency', v) }
 
-  const [timeoutMs, setTimeoutMsState] = useState<number>(() => db.get('timeoutMs', 2500))
+  const [timeoutMs, setTimeoutMsState] = useState<number>(() => db.get('timeoutMs') as number || 2500)
   const setTimeoutMs = (v: number) => { setTimeoutMsState(v); db.set('timeoutMs', v) }
 
   const [isScanning, setIsScanning] = useState(false)
   const [shouldStopScanning, setShouldStopScanning] = useState(false)
   const [scanProgress, setScanProgress] = useState({ current: 0, total: 0 })
 
-  const [subUrl, setSubUrlState] = useState<string>(() => db.get('subUrl', ''))
+  const [subUrl, setSubUrlState] = useState<string>(() => db.get('subUrl') as string || '')
   const setSubUrl = (v: string) => { setSubUrlState(v); db.set('subUrl', v) }
 
-  const [subRawInput, setSubRawInputState] = useState<string>(() => db.get('subRawInput', ''))
+  const [subRawInput, setSubRawInputState] = useState<string>(() => db.get('subRawInput') as string || '')
   const setSubRawInput = (v: string) => { setSubRawInputState(v); db.set('subRawInput', v) }
 
   const [transferredNodes, setTransferredNodes] = useState('')

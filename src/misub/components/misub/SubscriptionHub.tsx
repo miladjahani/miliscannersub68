@@ -193,7 +193,7 @@ export default function SubscriptionHub({ onSendToOptimizer, onSelectNodeToOptim
               <div className="node-meta font-mono">
                 <div><span className="meta-label">آدرس:</span> {node.address}:{node.port}</div>
                 {node.sni && <div><span className="meta-label">SNI:</span> {node.sni}</div>}
-                <div><span className="meta-label">شبکه:</span> {node.type} | {node.security}</div>
+                <div><span className="meta-label">شبکه:</span> {String(node.type ?? '')} | {String(node.security ?? '')}</div>
               </div>
 
               <div className="node-actions">
