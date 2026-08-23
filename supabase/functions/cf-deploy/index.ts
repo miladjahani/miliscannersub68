@@ -306,8 +306,12 @@ async function doDeploy(body: DeployRequest) {
     // انتخاب پیکربندی ورکر بر اساس نوع انتخاب‌شده - هر کدام سورس و binding متفاوت
     const sourceConfig = WORKER_SOURCES[worker_source];
     if (!sourceConfig) {
-      await appendLog(deployment_id, `❌ unknown worker_source: ${worker_source}`);
-      await updateDeployment(deployment_id, "failed", { error_message: `unknown worker_source: ${worker_source}` });
+      const availableTypes = Object.keys(WORKER_SOURCES).join(', ');
+      await appendLog(deployment_id, `❌ نوع ورکر نامعتبر: "${worker_source}"`);
+      await appendLog(deployment_id, `   انواع مجاز: ${availableTypes}`);
+      await updateDeployment(deployment_id, "failed", { 
+        error_message: `unknown worker_source: ${worker_source}. Available: ${availableTypes}` 
+      });
       return;
     }
     
@@ -318,18 +322,54 @@ async function doDeploy(body: DeployRequest) {
     const configFormat = sourceConfig.configFormat;
     const uuidEnv = sourceConfig.uuidEnvName;
 
-    // دانلود سورس کد از URL مخصوص به همان ورکر
+    // دانلود سورس کد از URL مخصوص به همان ورکر با اعتبارسنجی کامل
     const resolvedSourceUrl = sourceConfig.url;
-    await appendLog(deployment_id, `📦 downloading worker: ${sourceConfig.label}`);
-    await appendLog(deployment_id, `   source: ${resolvedSourceUrl}`);
-    const sourceResp = await fetch(resolvedSourceUrl);
-    if (!sourceResp.ok) {
-      await appendLog(deployment_id, "✗ failed to fetch worker source");
-      await updateDeployment(deployment_id, "failed", { error_message: "failed to fetch worker source" });
+    await appendLog(deployment_id, `📦 دانلود ورکر: ${sourceConfig.label}`);
+    await appendLog(deployment_id, `   آدرس سورس: ${resolvedSourceUrl}`);
+    
+    let workerCode: string;
+    try {
+      const sourceResp = await fetch(resolvedSourceUrl, {
+        headers: { 'User-Agent': 'Cloudflare-Worker-Deployer/2.0' }
+      });
+      
+      if (!sourceResp.ok) {
+        const errorBody = await sourceResp.text().catch(() => '');
+        const errorMsg = `شکست در دانلود از ${resolvedSourceUrl}: وضعیت ${sourceResp.status} ${sourceResp.statusText}`;
+        await appendLog(deployment_id, `❌ ${errorMsg}`);
+        if (errorBody.includes('404') || errorBody.includes('Not Found')) {
+          await appendLog(deployment_id, `   راهنمایی: فایل در مخزن گیت‌هاب وجود ندارد. مسیر را بررسی کنید.`);
+        }
+        await updateDeployment(deployment_id, "failed", { 
+          error_message: errorMsg,
+          deployment_config: { url: resolvedSourceUrl, status: sourceResp.status }
+        });
+        return;
+      }
+      
+      workerCode = await sourceResp.text();
+      
+      // اعتبارسنجی محتوا
+      if (!workerCode || workerCode.trim().length < 100) {
+        throw new Error(`محتوای دانلود شده خالی یا بسیار کوچک است (${workerCode.length} بایت)`);
+      }
+      
+      // بررسی اینکه HTML نباشد (جلوگیری از دانلود صفحه خطای گیت‌هاب)
+      if (workerCode.includes('<!DOCTYPE html>') || workerCode.includes('<html')) {
+        throw new Error('محتوای دانلود شده یک صفحه HTML است، نه کد جاوااسکریپت');
+      }
+      
+      await appendLog(deployment_id, `✅ سورس با موفقیت دانلود شد (${workerCode.length} بایت)`);
+      
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      await appendLog(deployment_id, `❌ خطا در دانلود: ${errorMsg}`);
+      await updateDeployment(deployment_id, "failed", { 
+        error_message: `دانلود سورس شکست خورد: ${errorMsg}`,
+        deployment_config: { url: resolvedSourceUrl }
+      });
       return;
     }
-    const workerCode = await sourceResp.text();
-    await appendLog(deployment_id, `✓ worker source fetched (${workerCode.length} bytes)`);
 
     const bindingMode = sourceConfig.bindingMode;
 
