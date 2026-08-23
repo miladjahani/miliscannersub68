@@ -1,0 +1,197 @@
+.misub-scope .view-container { display: flex; flex-direction: column; gap: 16px; }
+.misub-scope .tools-layout { display: flex; flex-direction: column; gap: 16px; }
+
+/* DohLab.vue */
+.misub-scope .doh-card { padding: 14px; background: var(--bg-input); border: 1px solid var(--border-color); }
+.misub-scope .doh-header h4 { color: var(--accent-cyan); font-size: 0.92rem; }
+.misub-scope .desc { font-size: 0.78rem; color: var(--text-secondary); margin-top: 2px; }
+.misub-scope .status-box { margin-top: 10px; padding: 6px 10px; border-radius: 6px; font-size: 0.78rem; }
+.misub-scope .status-box.ok { background: #064e3b; color: #34d399; }
+.misub-scope .status-box.err { background: #7f1d1d; color: #fca5a5; }
+.misub-scope .resolved-results { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+.misub-scope .ip-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.misub-scope .chip { background: #1e293b; border: 1px solid #334155; border-radius: 4px; padding: 4px 8px; font-size: 0.76rem; }
+
+/* WorkerProxySettings.vue */
+.misub-scope .settings-suite { display: flex; flex-direction: column; gap: 16px; }
+.misub-scope .db-card { display: flex; flex-direction: column; gap: 10px; border-color: var(--accent-cyan); }
+.misub-scope .db-header { display: flex; justify-content: space-between; align-items: center; }
+.misub-scope .db-header h4 { color: var(--accent-cyan); font-size: 0.95rem; }
+.misub-scope .db-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+.misub-scope .import-label { cursor: pointer; }
+.misub-scope .hint { font-size: 0.76rem; color: #64748b; margin-top: 4px; display: block; }
+.misub-scope .action-row { display: flex; gap: 10px; margin-top: 10px; }
+.misub-scope .worker-code-card { display: flex; flex-direction: column; gap: 10px; }
+.misub-scope .code-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+.misub-scope .code-header h4 { font-size: 0.9rem; color: #e2e8f0; }
+.misub-scope .code-box { font-size: 0.78rem; line-height: 1.4; color: #a5f3fc; }
+
+/* IpScanner.vue */
+.misub-scope .scanner-module { display: flex; flex-direction: column; gap: 16px; }
+.misub-scope .notice-box { font-size: 0.8rem; padding: 10px 14px; border-radius: 10px; background: rgba(251, 191, 36, 0.08); border: 1px solid rgba(251, 191, 36, 0.35); color: #fbbf24; }
+.misub-scope .notice-box.ok { background: rgba(52, 211, 153, 0.08); border-color: rgba(52, 211, 153, 0.35); color: #34d399; }
+.misub-scope .verified-badge { color: #3ddc84; font-size: 0.65rem; margin-inline-start: 3px; font-weight: 800; }
+.misub-scope .pool-selector { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 14px; }
+.misub-scope .selector-header { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 10px; color: #cbd5e1; }
+.misub-scope .chip-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.misub-scope .chip-btn { background: #1e293b; color: #cbd5e1; border: 1px solid #334155; border-radius: 6px; padding: 6px 12px; font-size: 0.78rem; cursor: pointer; transition: all 0.2s; }
+.misub-scope .chip-btn:hover { background: #334155; color: #fff; }
+.misub-scope .chip-btn.highlight { border-color: var(--accent-cyan); color: var(--accent-cyan); font-weight: bold; }
+.misub-scope .scanner-controls-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 14px; }
+@media (max-width: 768px) {
+  .misub-scope .scanner-controls-grid { grid-template-columns: 1fr; }
+}
+.misub-scope .config-side { display: flex; flex-direction: column; justify-content: space-between; }
+.misub-scope .action-btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.misub-scope .progress-bar-wrap { width: 100%; height: 6px; background: #1e293b; border-radius: 4px; overflow: hidden; }
+.misub-scope .progress-bar-fill { height: 100%; background: linear-gradient(90deg, #0284c7, #38bdf8); transition: width 0.3s ease; }
+.misub-scope .terminal-log-box { background: #020617; border: 1px solid #334155; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+.misub-scope .terminal-header { display: flex; justify-content: space-between; align-items: center; }
+.misub-scope .terminal-title { font-size: 0.8rem; font-weight: 700; color: var(--accent-cyan); }
+.misub-scope .terminal-logs { font-size: 0.75rem; max-height: 140px; overflow-y: auto; display: flex; flex-direction: column; gap: 3px; }
+.misub-scope .log-line { display: flex; gap: 8px; }
+.misub-scope .log-time { color: var(--text-muted); }
+.misub-scope .log-line.info .log-msg { color: #94a3b8; }
+.misub-scope .log-line.success .log-msg { color: #34d399; font-weight: 700; }
+.misub-scope .log-line.error .log-msg { color: #f87171; }
+.misub-scope .results-box { display: flex; flex-direction: column; gap: 12px; }
+.misub-scope .results-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; font-size: 0.85rem; }
+.misub-scope .stats { display: flex; gap: 14px; }
+
+/* Modal.vue */
+.misub-scope .modal-backdrop { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 16px; }
+.misub-scope .modal-dialog { max-width: 540px; width: 100%; max-height: 90vh; overflow-y: auto; }
+.misub-scope .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 14px; }
+.misub-scope .close-btn { background: none; border: none; color: #94a3b8; font-size: 1.4rem; cursor: pointer; }
+
+/* QrCodeModal.vue */
+.misub-scope .qr-container { display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center; }
+.misub-scope .qr-title { font-size: 0.85rem; color: #cbd5e1; word-break: break-all; }
+.misub-scope .qr-image-wrap { background: #fff; padding: 12px; border-radius: 12px; display: inline-block; }
+.misub-scope .qr-img { width: 200px; height: 200px; display: block; }
+.misub-scope .qr-actions { display: flex; gap: 8px; }
+
+/* CleanIpMatrix.vue */
+.misub-scope .matrix-card { padding: 12px; background: var(--bg-input); border: 1px solid var(--border-color); margin-bottom: 12px; }
+.misub-scope .matrix-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.misub-scope .matrix-header h4 { font-size: 0.9rem; color: var(--accent-cyan); }
+.misub-scope .matrix-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; }
+.misub-scope .matrix-item { background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 10px; cursor: pointer; display: flex; flex-direction: column; gap: 4px; transition: all 0.2s; }
+.misub-scope .matrix-item:hover { border-color: var(--accent-cyan); background: #334155; }
+.misub-scope .operator-title { font-size: 0.8rem; font-weight: bold; color: #f8fafc; }
+.misub-scope .ip-preview { font-size: 0.75rem; color: var(--accent-cyan); }
+.misub-scope .count-badge { font-size: 0.68rem; color: var(--text-muted); }
+
+/* FragmentLab.vue */
+.misub-scope .fragment-lab { background: var(--bg-input); border: 1px solid var(--border-color); padding: 14px; }
+.misub-scope .lab-header { margin-bottom: 10px; }
+.misub-scope .lab-header h4 { color: var(--accent-cyan); font-size: 0.92rem; }
+.misub-scope .desc code { color: var(--accent-lime, #c8f135); }
+.misub-scope .preset-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.misub-scope .fm-editor { font-size: 0.72rem; direction: ltr; text-align: left; }
+.misub-scope .validity { font-size: 0.74rem; margin-top: 4px; }
+
+/* ProxyInjector.vue */
+.misub-scope .proxy-injector { background: var(--bg-input); border: 1px solid var(--border-color); padding: 14px; margin-bottom: 12px; }
+.misub-scope .proxy-injector .body { margin-top: 10px; display: flex; flex-direction: column; gap: 10px; }
+.misub-scope .proxy-injector .desc { font-size: 0.78rem; color: var(--text-secondary); line-height: 1.7; }
+.misub-scope .feed-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.misub-scope .feed-msg { font-size: 0.76rem; }
+.misub-scope .list-actions { display: flex; align-items: center; gap: 10px; }
+.misub-scope .country-filter-row { display: flex; align-items: center; gap: 8px; font-size: 0.78rem; }
+.misub-scope .country-filter-row select { flex: 1; }
+.misub-scope .proxy-table-wrap { max-height: 220px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 8px; }
+.misub-scope .proxy-table { width: 100%; font-size: 0.76rem; border-collapse: collapse; }
+.misub-scope .proxy-table th { position: sticky; top: 0; background: var(--bg-card); padding: 6px 8px; text-align: right; }
+.misub-scope .proxy-table td { padding: 6px 8px; border-top: 1px solid var(--border-color); }
+.misub-scope .proxy-table tr { cursor: pointer; }
+.misub-scope .proxy-table tr.active { background: rgba(200, 241, 53, 0.08); }
+.misub-scope .manual-entry { display: flex; flex-direction: column; gap: 6px; }
+.misub-scope .manual-row { display: flex; gap: 6px; }
+.misub-scope .small-select { max-width: 100px; }
+.misub-scope .small-input { max-width: 90px; }
+.misub-scope .selected-summary { font-size: 0.78rem; background: rgba(52, 211, 153, 0.08); border: 1px solid rgba(52, 211, 153, 0.3); color: #34d399; padding: 8px 10px; border-radius: 8px; }
+
+/* QuickOptimizer.vue */
+.misub-scope .optimizer-suite { display: flex; flex-direction: column; gap: 16px; }
+.misub-scope .port-test-btn { margin-top: 6px; width: 100%; }
+.misub-scope .port-test-msg { font-size: 0.76rem; margin-top: 4px; }
+.misub-scope .ara-controls { background: var(--bg-input); border: 1px solid var(--border-color); border-radius: 10px; padding: 12px; margin-bottom: 12px; }
+.misub-scope .toggle-wrap.aras { color: var(--accent-green, #3ddc84); }
+.misub-scope .adv-toggle-btn { width: 100%; margin-top: 4px; }
+.misub-scope .adv-panel { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+.misub-scope .adv-panel.disabled { opacity: 0.5; pointer-events: none; }
+.misub-scope .aras-hint { font-size: 0.76rem; margin-top: 6px; }
+.misub-scope .sub-url-row { display: flex; gap: 8px; }
+.misub-scope .sub-url-row input { flex: 1; }
+.misub-scope .parse-errors { font-size: 0.78rem; margin-top: -4px; }
+.misub-scope .fragment-wrapper { margin-bottom: 12px; }
+.misub-scope .toggle-wrap { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--accent-cyan); font-weight: 700; cursor: pointer; margin-bottom: 8px; }
+.misub-scope .btn-action-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+.misub-scope .output-card { display: flex; flex-direction: column; gap: 12px; border-color: var(--accent-green); }
+.misub-scope .output-top { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+.misub-scope .output-top h4 { color: var(--accent-green); }
+.misub-scope .output-btns { display: flex; flex-wrap: wrap; gap: 6px; }
+.misub-scope .output-area { border-color: var(--accent-green); }
+.misub-scope .nodes-list-preview { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+.misub-scope .node-card-item { display: flex; flex-direction: column; gap: 6px; padding: 10px 14px; background: var(--bg-input); border: 1px solid var(--border-color); }
+.misub-scope .node-info { display: flex; align-items: center; gap: 8px; overflow: hidden; font-size: 0.78rem; }
+.misub-scope .idx { color: var(--accent-cyan); font-weight: bold; }
+.misub-scope .uri-text { color: #94a3b8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; }
+.misub-scope .node-meta-row { display: flex; justify-content: flex-end; align-items: center; gap: 8px; border-top: 1px solid var(--border-color); padding-top: 6px; }
+.misub-scope .ping-badge { font-size: 0.76rem; font-family: monospace; direction: ltr; }
+.misub-scope .more-hint { font-size: 0.78rem; text-align: center; }
+
+/* NodeDoctorPanel.vue */
+.misub-scope .doctor-card { padding: 14px; background: var(--bg-input); border: 1px solid var(--border-color); }
+.misub-scope .doctor-header h4 { color: var(--accent-cyan); font-size: 0.92rem; }
+.misub-scope .reports-list { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; max-height: 260px; overflow-y: auto; }
+.misub-scope .report-item { background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 8px 12px; }
+.misub-scope .report-item.healthy { border-color: #065f46; }
+.misub-scope .report-item.unhealthy { border-color: #991b1b; }
+.misub-scope .report-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.misub-scope .node-name { font-size: 0.8rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; }
+.misub-scope .issue-list { font-size: 0.75rem; margin-top: 6px; padding-right: 14px; }
+
+/* ClientConverterWorkspace.vue */
+.misub-scope .converter-card { padding: 14px; background: var(--bg-input); border: 1px solid var(--border-color); }
+.misub-scope .converter-header h4 { color: var(--accent-cyan); font-size: 0.92rem; }
+.misub-scope .format-buttons { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+.misub-scope .converted-output { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+.misub-scope .converted-top { display: flex; justify-content: space-between; align-items: center; }
+
+/* SubscriptionHub.vue */
+.misub-scope .misub-hub-suite { display: flex; flex-direction: column; gap: 16px; }
+.misub-scope .fetch-status { font-size: 0.76rem; margin-top: 6px; }
+.misub-scope .toolbar-box { display: flex; flex-direction: column; gap: 12px; }
+.misub-scope .search-filter-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }
+.misub-scope .tools-btn-group { display: flex; flex-wrap: wrap; gap: 6px; }
+.misub-scope .protocol-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.misub-scope .chip { display: inline-flex; align-items: center; gap: 6px; background: #1e293b; color: #cbd5e1; border: 1px solid #334155; border-radius: 6px; padding: 5px 10px; font-size: 0.78rem; cursor: pointer; }
+.misub-scope .chip.active { background: var(--accent-blue); color: #fff; border-color: var(--accent-cyan); }
+.misub-scope .nodes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+.misub-scope .node-item { display: flex; flex-direction: column; justify-content: space-between; gap: 8px; padding: 12px; }
+.misub-scope .node-header { display: flex; align-items: center; gap: 8px; }
+.misub-scope .node-title { font-size: 0.85rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; }
+.misub-scope .ping-pill { font-size: 0.72rem; font-family: monospace; direction: ltr; }
+.misub-scope .node-meta { font-size: 0.78rem; color: #94a3b8; display: flex; flex-direction: column; gap: 2px; }
+.misub-scope .meta-label { color: #64748b; }
+.misub-scope .node-actions { display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid var(--border-color); padding-top: 6px; }
+.misub-scope .btn-text { background: none; border: none; color: #94a3b8; font-size: 0.78rem; cursor: pointer; }
+.misub-scope .btn-text.highlight { color: var(--accent-cyan); font-weight: bold; }
+
+/* GeoIpInspector.vue */
+.misub-scope .geoip-card { padding: 14px; background: var(--bg-input); border: 1px solid var(--border-color); }
+.misub-scope .geoip-header h4 { color: var(--accent-cyan); font-size: 0.92rem; }
+.misub-scope .input-with-btn { display: flex; gap: 8px; }
+.misub-scope .geo-details {
+  margin-top: 10px;
+  background: #1e293b;
+  border-radius: 6px;
+  padding: 10px;
+  font-size: 0.78rem;
+  color: #cbd5e1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}

@@ -1,0 +1,22 @@
+# Deploys the main MiliConfig Pro dashboard (this React app + the bundled
+# misub-app/ sub-app under dist/misub-app/) as a Cloudflare Worker using
+# Workers Static Assets — no server-side Worker logic needed, since all
+# Cloudflare API calls happen server-side in the Supabase cf-deploy edge
+# function, not from the browser.
+name = "miliconfig-pro"
+compatibility_date = "2025-01-01"
+
+[assets]
+directory = "./dist"
+# Any real file (including everything under /misub-app/) is served as-is.
+# Only genuinely unmatched paths (React Router client routes like /deploy,
+# /tokens, /misub) fall back to index.html.
+not_found_handling = "single-page-application"
+
+[build]
+# Read by Cloudflare's native Git integration (Workers Builds) so the
+# whole thing deploys automatically on every push — no GitHub Actions,
+# no repo secrets. VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY are set as
+# build environment variables in the Cloudflare dashboard instead (see
+# DEPLOYMENT.md), never committed here.
+command = "npm run build"
