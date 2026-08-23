@@ -1,57 +1,55 @@
 ```
+# Build artifacts
+dist/
+build/
+*.js
+
 # Dependencies
 node_modules/
 
-# Build outputs (keep dist/ for GitHub Pages deployment)
-# build/
-# target/
-dist/assets/
-dist/index.html
-dist/misub-data/
-dist/repo/
-build/
-target/
+# Logs and temp files
+*.log
+*.tmp
+
+# Environment
+.env
+.env.local
+*.env.*
+
+# Editors
+.vscode/
+.idea/
 
 # Python
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
-.Python
-env/
-venv/
-.venv/
-.ENV
-.env
-.env.local
-.env.*
-.envrc
 
-# Logs
-*.log
-
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*.tmp
+# Compiled files
+*.o
+*.obj
+*.so
+*.a
+*.dll
+*.exe
+*.out
+*.class
 
 # Coverage
 coverage/
 htmlcov/
 .coverage
 
-# Compressed
+# Testing
+.pytest_cache/
+.mypy_cache/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Compressed files
 *.zip
 *.gz
 *.tar
@@ -70,12 +68,4 @@ htmlcov/
 *.Z
 *.lz
 *.lzo
-*.tar.gz
-*.tar.bz2
-*.tar.xz
-*.tar.zst
-
-# Supabase specific
-supabase/.temp/
-supabase/migrations/*.sql
 ```
