@@ -34,7 +34,7 @@ const WORKER_SOURCES: Record<string, {
 }> = {
   edgetunnel: {
     url: "https://raw.githubusercontent.com/cmliu/edgetunnel/main/_worker.js",
-    label: "cmliu/edgetunnel",
+    label: "cmliu/edgetunnel — ورکر کامل (VLESS/Trojan/SS + پنل)",
     compat: "2025-11-04",
     kvBinding: "KV",
     configKey: "config.json",
@@ -43,8 +43,9 @@ const WORKER_SOURCES: Record<string, {
     bindingMode: "kv",
   },
   edgetunnel_kv: {
+    // نسخه‌ای که تمام تنظیمات را از KV می‌خواند — مناسب برای تغییرات دینامیک
     url: "https://raw.githubusercontent.com/cmliu/edgetunnel/main/_worker.js",
-    label: "cmliu/edgetunnel (KV mode)",
+    label: "cmliu/edgetunnel (KV mode) — پیکربندی از KV",
     compat: "2025-11-04",
     kvBinding: "KV",
     configKey: "config.json",
@@ -53,8 +54,9 @@ const WORKER_SOURCES: Record<string, {
     bindingMode: "kv",
   },
   custom: {
+    // سورس اختصاصی Mili — نسخه پاکسازی‌شده CFnew v2.9.8c
     url: `${RAW_BASE}/public/repo/worker-source.js`,
-    label: "Mili — custom worker (CFnew v2.9.8c, cleaned)",
+    label: "Mili — سورس پروکسی اختصاصی (CFnew v2.9.8c, cleaned)",
     compat: "2025-01-01",
     kvBinding: "C",
     configKey: "c",
@@ -63,6 +65,7 @@ const WORKER_SOURCES: Record<string, {
     bindingMode: "kv",
   },
   misub_d1: {
+    // پنل چندکاربره MiSub با دیتابیس D1
     url: `${RAW_BASE}/public/repo/misub-proxy-source.js`,
     label: "MiSub — پنل چندکاربره پروکسی (D1)",
     compat: "2024-09-23",
@@ -73,6 +76,7 @@ const WORKER_SOURCES: Record<string, {
     bindingMode: "d1",
   },
   misub_scanner: {
+    // موتور اسکنر/بهینه‌ساز IP تمیز — بدون binding
     url: `${RAW_BASE}/public/repo/misub-scanner-worker.js`,
     label: "MiSub — موتور اسکنر/بهینه‌ساز (بدون binding)",
     compat: "2024-09-23",
