@@ -1,0 +1,32 @@
+# MiConfig Pro API — Edge Worker Configuration
+# این ورکر به عنوان بک‌اند API عمل می‌کند و از Cloudflare D1 و KV استفاده می‌کند
+
+name = "mili-api"
+compatibility_date = "2025-11-04"
+main = "workers/api/index.js"
+
+# D1 Database for persistent storage
+[[d1_databases]]
+binding = "DB"
+database_name = "mili-config-db"
+database_id = ""  # پس از ساخت با wrangler d1 create پر شود
+
+# KV Namespace for caching (optional)
+[[kv_namespaces]]
+binding = "KV"
+id = ""  # پس از ساخت با wrangler kv:namespace create پر شود
+preview_id = ""
+
+# Environment variables
+[vars]
+SOURCE_REPO = "miladjahani/miliconfig-pro"
+SOURCE_BRANCH = "main"
+
+# Build configuration
+[build]
+command = ""
+
+# Development settings
+[dev]
+port = 8787
+local_protocol = "http"
