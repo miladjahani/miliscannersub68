@@ -2,8 +2,13 @@
 # Dependencies
 node_modules/
 
-# Build outputs
-dist/
+# Build outputs (keep dist/ for GitHub Pages deployment)
+# build/
+# target/
+dist/assets/
+dist/index.html
+dist/misub-data/
+dist/repo/
 build/
 target/
 
