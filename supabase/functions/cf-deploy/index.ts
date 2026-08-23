@@ -1,90 +1,78 @@
-import { createClient } from "npm:@supabase/supabase-js@2.45.4";
-
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
 };
 
 const COMPAT = "2025-11-04";
 
-// Base raw-GitHub path for this repo's own bundled worker sources.
-// NOTE: update SOURCE_REPO to match wherever this project is actually pushed
-// (defaults to the account on file — override via the SOURCE_REPO env var
-// on the Supabase edge function if the repo lives somewhere else).
+// منبع گیت‌هاب برای سورس‌های ورکر
 const SOURCE_REPO = Deno.env.get("SOURCE_REPO") || "miladjahani/miliconfig-pro";
 const SOURCE_BRANCH = Deno.env.get("SOURCE_BRANCH") || "main";
-const SOURCE_BASE_URL = (Deno.env.get("WORKER_SOURCE_BASE_URL") || "").replace(/\/$/, "");
-const RAW_BASE = SOURCE_BASE_URL
-  ? `${SOURCE_BASE_URL}/${SOURCE_BRANCH}`
-  : `https://raw.githubusercontent.com/${SOURCE_REPO}/${SOURCE_BRANCH}`;
+const RAW_BASE = `https://raw.githubusercontent.com/${SOURCE_REPO}/${SOURCE_BRANCH}`;
 
-// Worker source repos — user can choose which one to deploy.
-// Each source has its own binding shape (KV / D1 / none) and its own
-// deployment steps further down in doDeploy().
+// تعریف ۵ نوع ورکر کاملاً متفاوت با سورس، binding و مراحل استقرار مجزا
 const WORKER_SOURCES: Record<string, {
   url: string;
   label: string;
   compat: string;
-  kvBinding: string;
-  configKey: string;
-  configFormat: 'edgetunnel' | 'custom' | 'misub_d1' | 'misub_scanner';
-  uuidEnvName: string;
+  kvBinding?: string;
+  d1Binding?: string;
+  configKey?: string;
+  configFormat: 'edgetunnel' | 'edgetunnel_kv' | 'custom' | 'misub_d1' | 'misub_scanner';
+  uuidEnvName?: string;
   bindingMode: 'kv' | 'd1' | 'none';
+  needsAdmin: boolean;
 }> = {
   edgetunnel: {
     url: "https://raw.githubusercontent.com/cmliu/edgetunnel/main/_worker.js",
-    label: "cmliu/edgetunnel — ورکر کامل (VLESS/Trojan/SS + پنل)",
+    label: "EdgeTunnel - ورکر کامل VLESS/Trojan/SS",
     compat: "2025-11-04",
     kvBinding: "KV",
     configKey: "config.json",
     configFormat: "edgetunnel",
     uuidEnvName: "UUID",
     bindingMode: "kv",
+    needsAdmin: true,
   },
   edgetunnel_kv: {
-    // نسخه‌ای که تمام تنظیمات را از KV می‌خواند — مناسب برای تغییرات دینامیک
     url: "https://raw.githubusercontent.com/cmliu/edgetunnel/main/_worker.js",
-    label: "cmliu/edgetunnel (KV mode) — پیکربندی از KV",
+    label: "EdgeTunnel KV - پیکربندی دینامیک از KV",
     compat: "2025-11-04",
     kvBinding: "KV",
     configKey: "config.json",
-    configFormat: "edgetunnel",
+    configFormat: "edgetunnel_kv",
     uuidEnvName: "UUID",
     bindingMode: "kv",
+    needsAdmin: true,
   },
   custom: {
-    // سورس اختصاصی Mili — نسخه پاکسازی‌شده CFnew v2.9.8c
     url: `${RAW_BASE}/public/repo/worker-source.js`,
-    label: "Mili — سورس پروکسی اختصاصی (CFnew v2.9.8c, cleaned)",
+    label: "Mili Custom - سورس اختصاصی CFnew v2.9.8c",
     compat: "2025-01-01",
     kvBinding: "C",
     configKey: "c",
     configFormat: "custom",
     uuidEnvName: "u",
     bindingMode: "kv",
+    needsAdmin: false,
   },
   misub_d1: {
-    // پنل چندکاربره MiSub با دیتابیس D1
     url: `${RAW_BASE}/public/repo/misub-proxy-source.js`,
-    label: "MiSub — پنل چندکاربره پروکسی (D1)",
+    label: "MiSub Panel - پنل چندکاربره با D1",
     compat: "2024-09-23",
-    kvBinding: "",
-    configKey: "",
+    d1Binding: "DB",
     configFormat: "misub_d1",
-    uuidEnvName: "",
     bindingMode: "d1",
+    needsAdmin: true,
   },
   misub_scanner: {
-    // موتور اسکنر/بهینه‌ساز IP تمیز — بدون binding
     url: `${RAW_BASE}/public/repo/misub-scanner-worker.js`,
-    label: "MiSub — موتور اسکنر/بهینه‌ساز (بدون binding)",
+    label: "MiSub Scanner - موتور اسکنر IP",
     compat: "2024-09-23",
-    kvBinding: "",
-    configKey: "",
     configFormat: "misub_scanner",
-    uuidEnvName: "",
     bindingMode: "none",
+    needsAdmin: false,
   },
 };
 
@@ -97,26 +85,51 @@ interface DeployRequest {
   custom_domain?: string;
   zone_id?: string;
   method: "workers" | "pages";
-  worker_source?: string;
+  worker_source: string;
   proxyip?: string;
   admin_password?: string;
   cf_account_id?: string;
-  source_url?: string;
 }
 
-const supabase = createClient(
-  Deno.env.get("SUPABASE_URL")!,
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-);
+interface DeploymentRecord {
+  id: string;
+  status: string;
+  logs: string;
+  worker_url?: string;
+  panel_url?: string;
+  error_message?: string;
+  kv_namespace_id?: string;
+  d1_database_id?: string;
+  cf_account_id?: string;
+  route?: string;
+  worker_source?: string;
+  deployment_config?: any;
+}
+
+// شبیه‌سازی دیتابیس در حافظه (در محیط واقعی از D1 یا KV استفاده کنید)
+const deploymentsDB = new Map<string, DeploymentRecord>();
 
 async function appendLog(id: string, line: string) {
-  const { data } = await supabase.from("deployments").select("logs").eq("id", id).maybeSingle();
-  const existing = (data as { logs: string | null } | null)?.logs ?? "";
-  await supabase.from("deployments").update({ logs: existing + line + "\n" }).eq("id", id);
+  const dep = deploymentsDB.get(id);
+  if (dep) {
+    dep.logs = (dep.logs || "") + line + "\n";
+    deploymentsDB.set(id, dep);
+  }
 }
 
 async function updateDeployment(id: string, status: string, updates: Record<string, unknown>) {
-  await supabase.from("deployments").update({ status, ...updates }).eq("id", id);
+  const dep = deploymentsDB.get(id);
+  if (dep) {
+    deploymentsDB.set(id, { ...dep, status, ...updates });
+  }
+}
+
+async function getDeployment(id: string): Promise<DeploymentRecord | null> {
+  return deploymentsDB.get(id) || null;
+}
+
+async function createDeployment(record: DeploymentRecord) {
+  deploymentsDB.set(record.id, record);
 }
 
 
@@ -250,31 +263,30 @@ async function doDeploy(body: DeployRequest) {
     custom_domain = "",
     zone_id = "",
     method = "workers",
-    worker_source = "edgetunnel",
+    worker_source,
     proxyip = "",
     admin_password = "",
     cf_account_id = "",
-    source_url = "",
   } = body;
 
   const apiBase = "https://api.cloudflare.com/client/v4";
   const headers = { Authorization: `Bearer ${cf_token}` };
 
   try {
-    await appendLog(deployment_id, "verifying token...");
+    await appendLog(deployment_id, "🔐 verifying token...");
     const verifyResp = await fetch(`${apiBase}/user/tokens/verify`, { headers });
     const verifyData = await verifyResp.json();
     if (!verifyData.success) {
-      await appendLog(deployment_id, "✗ invalid cloudflare token");
+      await appendLog(deployment_id, "❌ invalid cloudflare token");
       await updateDeployment(deployment_id, "failed", { error_message: "invalid cloudflare token" });
       return;
     }
-    await appendLog(deployment_id, "✓ token verified");
+    await appendLog(deployment_id, "✅ token verified");
 
     let accountId = cf_account_id.trim();
     let accountName = "";
     if (accountId) {
-      await appendLog(deployment_id, `checking selected Cloudflare account ${accountId.slice(0, 8)}...`);
+      await appendLog(deployment_id, `checking Cloudflare account ${accountId.slice(0, 8)}...`);
       const accountResp = await cloudflareJson(`${apiBase}/accounts/${accountId}`, headers);
       if (!accountResp.success || !accountResp.result?.id) {
         throw new Error(accountResp.errors?.[0]?.message ?? "selected Cloudflare account is not accessible");
@@ -289,18 +301,27 @@ async function doDeploy(body: DeployRequest) {
       accountId = accountsData.result[0].id;
       accountName = accountsData.result[0].name ?? accountId;
     }
-    await appendLog(deployment_id, `✓ account: ${accountName} (${accountId.slice(0, 8)}...)`);
+    await appendLog(deployment_id, `✅ account: ${accountName} (${accountId.slice(0, 8)}...)`);
 
-    const sourceConfig = WORKER_SOURCES[worker_source] ?? WORKER_SOURCES.edgetunnel;
+    // انتخاب پیکربندی ورکر بر اساس نوع انتخاب‌شده - هر کدام سورس و binding متفاوت
+    const sourceConfig = WORKER_SOURCES[worker_source];
+    if (!sourceConfig) {
+      await appendLog(deployment_id, `❌ unknown worker_source: ${worker_source}`);
+      await updateDeployment(deployment_id, "failed", { error_message: `unknown worker_source: ${worker_source}` });
+      return;
+    }
+    
     const compatDate = sourceConfig.compat;
     const kvBindingName = sourceConfig.kvBinding;
+    const d1BindingName = sourceConfig.d1Binding;
     const configKvKey = sourceConfig.configKey;
     const configFormat = sourceConfig.configFormat;
     const uuidEnv = sourceConfig.uuidEnvName;
 
-    const resolvedSourceUrl = source_url.trim() || sourceConfig.url;
-    await appendLog(deployment_id, `fetching worker source from ${sourceConfig.label}...`);
-    await appendLog(deployment_id, `source: ${resolvedSourceUrl}`);
+    // دانلود سورس کد از URL مخصوص به همان ورکر
+    const resolvedSourceUrl = sourceConfig.url;
+    await appendLog(deployment_id, `📦 downloading worker: ${sourceConfig.label}`);
+    await appendLog(deployment_id, `   source: ${resolvedSourceUrl}`);
     const sourceResp = await fetch(resolvedSourceUrl);
     if (!sourceResp.ok) {
       await appendLog(deployment_id, "✗ failed to fetch worker source");
@@ -434,12 +455,15 @@ async function doDeploy(body: DeployRequest) {
     }
 
     if (bindingMode === "kv") {
+      const kvLabel = configFormat === 'custom' ? 'C (Mili)' : 'KV (EdgeTunnel)';
+      await appendLog(deployment_id, `💾 writing config to ${kvLabel} namespace...`);
+      
       await fetch(`${apiBase}/accounts/${accountId}/storage/kv/namespaces/${kvNamespaceId}/values/${configKvKey}`, {
         method: "PUT",
         headers: { ...headers, "Content-Type": "application/json" },
         body: JSON.stringify(initialConfig, null, 2),
       }).catch(() => null);
-      await appendLog(deployment_id, `✓ initial config written to KV (${configKvKey})`);
+      await appendLog(deployment_id, `✅ config saved to KV key: ${configKvKey}`);
 
       // Also write ADD.txt for custom IPs
       await fetch(`${apiBase}/accounts/${accountId}/storage/kv/namespaces/${kvNamespaceId}/values/${addTxtKey}`, {
@@ -447,6 +471,7 @@ async function doDeploy(body: DeployRequest) {
         headers: { ...headers, "Content-Type": "text/plain" },
         body: proxyip || "",
       }).catch(() => null);
+      await appendLog(deployment_id, `✅ proxy IPs written to ${addTxtKey}`);
     }
 
     let workerUrl: string;
@@ -454,7 +479,13 @@ async function doDeploy(body: DeployRequest) {
     const panelKey = custom_path || uuid;
 
     if (method === "workers") {
-      await appendLog(deployment_id, "uploading worker script...");
+      const bindingDesc = bindingMode === 'kv' 
+        ? `KV (${kvBindingName})` 
+        : bindingMode === 'd1' 
+          ? `D1 (${d1DatabaseId.slice(0, 8)}...)` 
+          : 'No Binding';
+      await appendLog(deployment_id, `📤 uploading ${sourceConfig.label} with ${bindingDesc}...`);
+      
       const meta = {
         main_module: "worker.js",
         compatibility_date: compatDate,
@@ -462,27 +493,24 @@ async function doDeploy(body: DeployRequest) {
         bindings:
           bindingMode === "kv"
             ? [
-                { type: "kv_namespace", name: kvBindingName, namespace_id: kvNamespaceId },
-                { type: "plain_text", name: uuidEnv, text: uuid },
-                ...(configFormat === "edgetunnel" ? [
+                { type: "kv_namespace", name: kvBindingName!, namespace_id: kvNamespaceId },
+                { type: "plain_text", name: uuidEnv!, text: uuid },
+                ...(configFormat === "edgetunnel" || configFormat === "edgetunnel_kv" ? [
                   { type: "plain_text", name: "PATH", text: custom_path ? (custom_path.startsWith("/") ? custom_path : "/" + custom_path) : "/" },
                   { type: "plain_text", name: "PROXYIP", text: proxyip },
-                  ...(admin_password ? [{ type: "plain_text", name: "ADMIN", text: admin_password }] : []),
+                  ...(admin_password && sourceConfig.needsAdmin ? [{ type: "plain_text", name: "ADMIN", text: admin_password }] : []),
                 ] : [
                   { type: "plain_text", name: "P", text: proxyip },
                 ]),
               ]
             : bindingMode === "d1"
             ? [
-                // MiSub multi-user panel: D1 database + self-management vars.
-                // CF_API_TOKEN is bound as a secret (never readable back via API)
-                // so the worker can self-update its own script later if needed.
                 { type: "d1", name: "DB", id: d1DatabaseId },
                 { type: "plain_text", name: "CF_ACCOUNT_ID", text: accountId },
                 { type: "secret_text", name: "CF_API_TOKEN", text: cf_token },
                 { type: "plain_text", name: "WORKER_NAME", text: worker_name },
               ]
-            : [], // misub_scanner needs no bindings at all
+            : [],
       };
 
       const formData = new FormData();
@@ -500,11 +528,11 @@ async function doDeploy(body: DeployRequest) {
       const uploadData = await uploadResp.json();
       if (!uploadData.success) {
         const msg = uploadData.errors?.[0]?.message ?? "failed to upload worker";
-        await appendLog(deployment_id, `✗ ${msg}`);
+        await appendLog(deployment_id, `❌ ${msg}`);
         await updateDeployment(deployment_id, "failed", { error_message: msg });
         return;
       }
-      await appendLog(deployment_id, "✓ worker script uploaded");
+      await appendLog(deployment_id, "✅ worker script uploaded");
 
       await appendLog(deployment_id, "enabling workers.dev route for script...");
       const subdomainResp = await fetch(`${apiBase}/accounts/${accountId}/workers/scripts/${worker_name}/subdomain`, {
@@ -639,12 +667,11 @@ async function doDeploy(body: DeployRequest) {
       }
     }
 
+    // تعیین آدرس پنل بر اساس نوع ورکر
     if (configFormat === "misub_d1") {
-      // MiSub panel: no /{uuid} path convention — the panel lives at the
-      // worker root and is protected by an admin password stored in D1.
       panelUrl = workerUrl;
       if (admin_password) {
-        await appendLog(deployment_id, "setting panel password in D1...");
+        await appendLog(deployment_id, "🔐 setting MiSub panel password in D1...");
         const passwordResp = await cloudflareJson(
           `${apiBase}/accounts/${accountId}/d1/database/${d1DatabaseId}/query`,
           headers,
@@ -652,29 +679,33 @@ async function doDeploy(body: DeployRequest) {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              sql: "CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT); INSERT OR REPLACE INTO settings (key, value) VALUES ('panel_password', ?);",
+              sql: "INSERT OR REPLACE INTO settings (key, value) VALUES ('panel_password', ?);",
               params: [admin_password],
             }),
           },
         );
         if (!passwordResp.success) {
-          throw new Error(passwordResp.errors?.[0]?.message ?? "failed to set MiSub panel password");
+          throw new Error(passwordResp.errors?.[0]?.message ?? "failed to set panel password");
         }
-        await appendLog(deployment_id, "✓ panel password set");
+        await appendLog(deployment_id, "✅ panel password saved in D1");
       }
     } else if (configFormat === "misub_scanner") {
-      // Stateless scanner/optimizer API — no panel, just the API root.
       panelUrl = workerUrl;
+      await appendLog(deployment_id, "📡 scanner API ready - no panel needed");
     } else {
       panelUrl = `${workerUrl}/${panelKey}`;
+      await appendLog(deployment_id, `🎛️ panel available at /${panelKey}`);
     }
-    await appendLog(deployment_id, `✓ panel URL: ${panelUrl}`);
-    await appendLog(deployment_id, "✓ deployment complete!");
+    
+    await appendLog(deployment_id, "🎉 deployment completed successfully!");
+    await appendLog(deployment_id, `   Worker URL: ${workerUrl}`);
+    await appendLog(deployment_id, `   Panel URL: ${panelUrl}`);
 
     await updateDeployment(deployment_id, "deployed", {
       worker_url: workerUrl,
       panel_url: panelUrl,
       kv_namespace_id: kvNamespaceId || null,
+      d1_database_id: d1DatabaseId || null,
       cf_account_id: accountId,
       route: custom_domain || null,
       worker_source: worker_source,
@@ -702,17 +733,30 @@ Deno.serve(async (req: Request) => {
   try {
     const body: DeployRequest = await req.json();
 
-    if (!body.worker_name || !body.cf_token || !body.uuid || !body.deployment_id) {
+    if (!body.worker_name || !body.cf_token || !body.uuid || !body.deployment_id || !body.worker_source) {
       return new Response(
-        JSON.stringify({ success: false, error: "missing required fields" }),
+        JSON.stringify({ success: false, error: "missing required fields: worker_name, cf_token, uuid, deployment_id, worker_source" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
+    // ایجاد رکورد استقرار در دیتابیس
+    await createDeployment({
+      id: body.deployment_id,
+      status: "deploying",
+      logs: `🚀 starting deployment of ${body.worker_source}...`,
+      worker_name: body.worker_name,
+    });
+
     EdgeRuntime.waitUntil(doDeploy(body));
 
     return new Response(
-      JSON.stringify({ success: true, message: "deployment started", deployment_id: body.deployment_id }),
+      JSON.stringify({ 
+        success: true, 
+        message: "deployment started", 
+        deployment_id: body.deployment_id,
+        worker_source: body.worker_source,
+      }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (err) {
